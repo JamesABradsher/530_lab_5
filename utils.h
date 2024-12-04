@@ -12,7 +12,7 @@
 #define MB 1024 * 1024
 #define KB 1024
 
-int file_desc;
+int io_fd, data_fd;
 char *buf;
 char *output = "dummy.txt";
 

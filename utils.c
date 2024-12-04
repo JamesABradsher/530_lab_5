@@ -2,10 +2,10 @@
 
 int main(int argc, char **argv, char **envp) {
 
-  int (*io_operation)();
+  int (*io_operation)() = io_write;
 
   int c;
-  while ((c = getopt(argc, argv, "s:b:o:mr")) != -1) {
+  while ((c = getopt(argc, argv, "s:b:o:m:r")) != -1) {
     switch (c) {
     case 's':
       stride = process_opt(optarg);
@@ -17,6 +17,10 @@ int main(int argc, char **argv, char **envp) {
       output = strdup(optarg);
       break;
     case 'm':
+      if (strcmp(optarg, "r") == 0) {
+        printf("reading\n");
+        io_operation = io_read;
+      }
       break;
     case 'r':
       break;
@@ -25,27 +29,16 @@ int main(int argc, char **argv, char **envp) {
     }
   }
 
-  file_desc = open(output, O_RDWR | O_CREAT | O_DIRECT, 0644);
+  io_fd = open(output, O_RDWR | O_CREAT, 0644);
+
+#ifdef __APPLE__
+  fcntl(io_fd, F_NOCACHE, 1);
+#endif
   buf = (char *)malloc(GB * sizeof(char));
   memset(buf, '1',
          GB); // buffer filled with single random char for the sake of testing
 
-  time_t start, stop;
-  start = time(NULL);
-  for (int i = 0; i < GB / block_size; i++) {
-    write(file_desc, buf, block_size);
-    lseek(file_desc, stride, SEEK_CUR);
-  }
-  fsync(file_desc);
-
-  stop = time(NULL);
-
-  printf("Start: %ld, stop: %ld, dif %ld\n", start, stop, stop - start);
-
-  double throughput = GB / ((stop - start) / 1000);
-  printf("Throughput = %f gb/s\n", throughput);
-
-  free(buf);
+  io_operation();
 }
 
 int process_opt(char *opt) {
@@ -71,4 +64,30 @@ int process_opt(char *opt) {
   rv = rv > 100 * MB ? 100 * MB : rv;
 
   return rv;
+}
+
+int io_write() {
+  time_t start, stop;
+  start = time(NULL);
+  for (int i = 0; i < GB / block_size; i++) {
+    write(file_desc, buf, block_size);
+    lseek(file_desc, stride, SEEK_CUR);
+  }
+  fsync(file_desc);
+
+  stop = time(NULL);
+
+  printf("Start: %ld, stop: %ld, dif %ld\n", start, stop, stop - start);
+
+  double throughput = 1.07 / ((stop - start));
+  printf("Throughput = %f gb/s\n", throughput);
+
+  free(buf);
+
+  return throughput;
+}
+
+int io_read() {
+  printf("very busy\n");
+  return 0;
 }

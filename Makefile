@@ -1,5 +1,5 @@
 all:
 	gcc utils.c -o utils
 
-clear:
+clean:
 	rm -f utils *.txt
