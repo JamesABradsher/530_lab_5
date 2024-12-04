@@ -2,4 +2,4 @@ all:
 	gcc utils.c -o utils
 
 clear:
-	rm -f utils
+	rm -f utils *.txt
