@@ -29,10 +29,10 @@ int main(int argc, char **argv, char **envp) {
     }
   }
 
-  io_fd = open(output, O_RDWR | O_CREAT, 0644);
+  file_desc = open(output, O_RDWR | O_CREAT | O_SYNC, 0644);
 
 #ifdef __APPLE__
-  fcntl(io_fd, F_NOCACHE, 1);
+  fcntl(file_desc, F_NOCACHE, 1);
 #endif
   buf = (char *)malloc(GB * sizeof(char));
   memset(buf, '1',
@@ -79,7 +79,7 @@ int io_write() {
 
   printf("Start: %ld, stop: %ld, dif %ld\n", start, stop, stop - start);
 
-  double throughput = 1.07 / ((stop - start));
+  double throughput = 1.0 / ((stop - start));
   printf("Throughput = %f gb/s\n", throughput);
 
   free(buf);
@@ -88,6 +88,22 @@ int io_write() {
 }
 
 int io_read() {
-  printf("very busy\n");
-  return 0;
+  time_t start, stop;
+  start = time(NULL);
+  for (int i = 0; i < GB / block_size; i++) {
+    read(file_desc, buf, block_size);
+    lseek(file_desc, stride, SEEK_CUR);
+  }
+  fsync(file_desc);
+
+  stop = time(NULL);
+
+  printf("Start: %ld, stop: %ld, dif %ld\n", start, stop, stop - start);
+
+  double throughput = 1.0 / ((stop - start));
+  printf("Throughput = %f gb/s\n", throughput);
+
+  free(buf);
+
+  return throughput;
 }
