@@ -25,7 +25,7 @@ int main(int argc, char **argv, char **envp) {
     }
   }
 
-  file_desc = open(output, O_RDWR | O_CREAT | O_DIRCT, 0644);
+  file_desc = open(output, O_RDWR | O_CREAT | O_DIRECT, 0644);
   buf = (char *)malloc(GB * sizeof(char));
   memset(buf, '1',
          GB); // buffer filled with single random char for the sake of testing
