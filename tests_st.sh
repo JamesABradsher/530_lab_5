@@ -47,3 +47,5 @@ do
     done
     stride=`expr $stride \* 2`
 done
+
+make clean

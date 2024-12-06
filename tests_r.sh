@@ -36,3 +36,5 @@ do
     done
     block=`expr $block \* 2`
 done
+
+make clean
