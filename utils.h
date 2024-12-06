@@ -2,6 +2,7 @@
 #define UTILS_H
 
 #include <fcntl.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,6 +19,7 @@ char *output = "dummy.txt";
 
 int stride = 0;
 int block_size = 4 * KB;
+int is_random = 0;
 
 int process_opt(char *);
 int io_read();

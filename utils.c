@@ -5,7 +5,7 @@ int main(int argc, char **argv, char **envp) {
   int (*io_operation)() = io_write;
 
   int c;
-  while ((c = getopt(argc, argv, "s:b:o:m:r")) != -1) {
+  while ((c = getopt(argc, argv, "s:b:o:rx")) != -1) {
     switch (c) {
     case 's':
       stride = process_opt(optarg);
@@ -16,20 +16,18 @@ int main(int argc, char **argv, char **envp) {
     case 'o':
       output = strdup(optarg);
       break;
-    case 'm':
-      if (strcmp(optarg, "r") == 0) {
-        printf("reading\n");
-        io_operation = io_read;
-      }
-      break;
     case 'r':
+      io_operation = io_read;
+      break;
+    case 'x':
+      is_random = 1;
       break;
     default:
       break;
     }
   }
 
-  file_desc = open(output, O_RDWR | O_CREAT | O_SYNC, 0644);
+  file_desc = open(output, O_RDWR | O_CREAT, 0644);
 
 #ifdef __APPLE__
   fcntl(file_desc, F_NOCACHE, 1);
@@ -67,20 +65,33 @@ int process_opt(char *opt) {
 }
 
 int io_write() {
-  time_t start, stop;
-  start = time(NULL);
+  struct timespec start, stop;
+  clock_gettime(CLOCK_REALTIME, &start);
   for (int i = 0; i < GB / block_size; i++) {
     write(file_desc, buf, block_size);
     lseek(file_desc, stride, SEEK_CUR);
+    if (is_random) {
+      srand(time(NULL));
+      int rstride = rand() % 16;
+      rstride = (int)pow(2.0, (double)rstride) * 4096;
+
+      if ((rand() % 8 + 1) % 3 == 0) {
+        rstride *= -1;
+      }
+      lseek(file_desc, rstride, SEEK_CUR);
+    }
   }
   fsync(file_desc);
 
-  stop = time(NULL);
+  clock_gettime(CLOCK_REALTIME, &stop);
 
-  printf("Start: %ld, stop: %ld, dif %ld\n", start, stop, stop - start);
+  float sec, nsec;
 
-  double throughput = 1.0 / ((stop - start));
-  printf("Throughput = %f gb/s\n", throughput);
+  sec = stop.tv_sec - start.tv_sec;
+  nsec = stop.tv_nsec - start.tv_nsec;
+
+  double throughput = 1.0 / (sec + nsec / 1000000000);
+  printf("%f\n", throughput);
 
   free(buf);
 
@@ -88,20 +99,33 @@ int io_write() {
 }
 
 int io_read() {
-  time_t start, stop;
-  start = time(NULL);
+  struct timespec start, stop;
+  clock_gettime(CLOCK_REALTIME, &start);
   for (int i = 0; i < GB / block_size; i++) {
     read(file_desc, buf, block_size);
     lseek(file_desc, stride, SEEK_CUR);
+    if (is_random) {
+      srand(time(NULL));
+      int rstride = rand() % 16;
+      rstride = (int)pow(2.0, (double)rstride) * 4096;
+
+      if ((rand() % 8 + 1) % 3 == 0) {
+        rstride *= -1;
+      }
+      lseek(file_desc, rstride, SEEK_CUR);
+    }
   }
   fsync(file_desc);
 
-  stop = time(NULL);
+  clock_gettime(CLOCK_REALTIME, &stop);
 
-  printf("Start: %ld, stop: %ld, dif %ld\n", start, stop, stop - start);
+  float sec, nsec;
 
-  double throughput = 1.0 / ((stop - start));
-  printf("Throughput = %f gb/s\n", throughput);
+  sec = stop.tv_sec - start.tv_sec;
+  nsec = stop.tv_nsec - start.tv_nsec;
+
+  double throughput = 1.0 / (sec + nsec / 1000000000);
+  printf("%f\n", throughput);
 
   free(buf);
 
