@@ -1,3 +1,9 @@
+/* COMP 530: Benchmark Utility */
+
+// PID: 730466078
+// PID: 730481231
+// I pledge the COMP530 honor code.
+
 #ifndef UTILS_H
 #define UTILS_H
 

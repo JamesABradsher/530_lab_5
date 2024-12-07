@@ -1,3 +1,9 @@
+/* COMP 530: Benchmark Utility */
+
+// PID: 730466078
+// PID: 730481231
+// I pledge the COMP530 honor code.
+
 #include "utils.h"
 
 int main(int argc, char **argv, char **envp) {
@@ -21,6 +27,7 @@ int main(int argc, char **argv, char **envp) {
       break;
     case 'x':
       is_random = 1;
+      srand(time(NULL));
       break;
     default:
       break;
@@ -31,7 +38,14 @@ int main(int argc, char **argv, char **envp) {
 
 #ifdef __APPLE__
   fcntl(file_desc, F_NOCACHE, 1);
+
 #endif
+
+#ifdef __LINUX___
+  posix_fadvise(file_desc, 0, 0, POSIX_FADV_DONTNEED);
+  printf("Linun\n");
+#endif
+
   buf = (char *)malloc(GB * sizeof(char));
   memset(buf, '1',
          GB); // buffer filled with single random char for the sake of testing
@@ -71,13 +85,12 @@ int io_write() {
     write(file_desc, buf, block_size);
     lseek(file_desc, stride, SEEK_CUR);
     if (is_random) {
-      srand(time(NULL));
       int rstride = rand() % 16;
       rstride = (int)pow(2.0, (double)rstride) * 4096;
 
-      if ((rand() % 8 + 1) % 3 == 0) {
-        rstride *= -1;
-      }
+      // if ((rand() % 8 + 1) % 3 == 0) {
+      //   rstride /= -2;
+      // }
       lseek(file_desc, rstride, SEEK_CUR);
     }
   }
@@ -105,7 +118,6 @@ int io_read() {
     read(file_desc, buf, block_size);
     lseek(file_desc, stride, SEEK_CUR);
     if (is_random) {
-      srand(time(NULL));
       int rstride = rand() % 16;
       rstride = (int)pow(2.0, (double)rstride) * 4096;
 

@@ -15,7 +15,7 @@ do
     echo "Block: $block kb" >> Output_R
     for i in 1 2 3 4 5 6 7 8 9 10
     do 
-        ./utils -b $block\k -o S_$block\k.txt -x >> Output_R
+        ./utils -b $block\k -o Random.txt -x >> Output_R
     done
     block=`expr $block \* 2`
 done
@@ -32,7 +32,7 @@ do
     echo "Block: $block kb" >> Output_R
     for i in 1 2 3 4 5 6 7 8 9 10
     do 
-        ./utils -r -b $block\k -o S_$block\k.txt -x >> Output_R
+        ./utils -r -b $block\k -o Random.txt -x >> Output_R
     done
     block=`expr $block \* 2`
 done

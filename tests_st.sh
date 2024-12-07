@@ -13,11 +13,11 @@ while [ $stride -le 131072 ]
 do
     echo "Stride: $stride kb" 
     echo "Stride: $stride kb" >> Output_ST
-    for i in 4 64 256 1024 16384 128000 
+    for i in 4 64 256 1024 10240
     do 
         echo "Block: $i kb"
         echo "Block: $i kb" >> Output_ST
-        for j in 1 2 3 4 5 6 7 8 9 10
+        for j in 1 2 3 4 5
         do 
             ./utils -b $i\k -s $stride -o Strided.txt >> Output_ST
         done
@@ -35,11 +35,11 @@ while [ $stride -le 131072 ]
 do
     echo "Stride: $stride kb" 
     echo "Stride: $stride kb" >> Output_ST
-    for i in 4 64 256 1024 16384 128000 
+    for i in 4 64 256 1024 10240  
     do 
         echo "Block: $i kb"
         echo "Block: $i kb" >> Output_ST
-        for j in 1 2 3 4 5 6 7 8 9 10
+        for j in 1 2 3 4 5
         do 
             ./utils -r -b $i\k -s $stride -o Strided.txt >> Output_ST
         done
